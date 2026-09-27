@@ -24,6 +24,7 @@ export default function AddCustomerModal({ onClose, onCustomerCreated }) {
         name: name.trim(),
         email: email.trim() || `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
         industry: deviceModel.trim() || 'ZenBook Ultra 15 Pro',
+        device_model: deviceModel.trim() || 'ZenBook Ultra 15 Pro',
         tier: tier,
         stage: 'Active Support',
         contact_name: name.trim(),
@@ -34,7 +35,8 @@ export default function AddCustomerModal({ onClose, onCustomerCreated }) {
       onClose();
     } catch (err) {
       console.error('Failed to create customer:', err);
-      setError('Failed to create new customer bank. Please try again.');
+      const errDetail = err.response?.data?.detail || err.message || 'Server error';
+      setError(`Failed to create new customer bank: ${errDetail}. Check your backend connection.`);
     } finally {
       setLoading(false);
     }
