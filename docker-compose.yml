@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - HINDSIGHT_API_URL=${HINDSIGHT_API_URL:-https://api.hindsight.vectorize.io}
+      - HINDSIGHT_API_KEY=${HINDSIGHT_API_KEY:-MEMHACK99_DEMO}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-llama-3.3-70b-versatile}
+      - PORT=8000
+      - HOST=0.0.0.0
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: always
