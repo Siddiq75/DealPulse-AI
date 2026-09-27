@@ -24,20 +24,29 @@ export default function App() {
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
   const [memoryTrigger, setMemoryTrigger] = useState(0);
 
+  const [apiError, setApiError] = useState(null);
+
   useEffect(() => {
     loadAccounts();
   }, []);
 
   const loadAccounts = async () => {
     setLoading(true);
+    setApiError(null);
     try {
       const data = await api.getAccounts();
-      setAccounts(data);
-      if (data.length > 0 && !selectedAccount) {
-        setSelectedAccount(data[0]);
+      if (Array.isArray(data)) {
+        setAccounts(data);
+        if (data.length > 0) {
+          setSelectedAccount(prev => prev || data[0]);
+        }
+      } else {
+        setAccounts([]);
       }
     } catch (err) {
       console.error('Failed to load customers:', err);
+      setAccounts([]);
+      setApiError('Unable to connect to DealPulse backend API. Please make sure your backend is running or set VITE_API_BASE_URL in Vercel environment variables.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +62,8 @@ export default function App() {
     }
   };
 
-  const totalMemories = accounts.reduce((acc, a) => acc + (a.memory_count || 0), 0);
+  const accountList = Array.isArray(accounts) ? accounts : [];
+  const totalMemories = accountList.reduce((acc, a) => acc + (a?.memory_count || 0), 0);
 
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
@@ -67,8 +77,23 @@ export default function App() {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
         
+        {apiError && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>{apiError}</span>
+            </div>
+            <button 
+              onClick={loadAccounts}
+              className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold transition shrink-0"
+            >
+              Retry Connection
+            </button>
+          </div>
+        )}
+
         {/* Global Key Stats Bar */}
-        <StatsOverview accounts={accounts} totalMemories={totalMemories} />
+        <StatsOverview accounts={accountList} totalMemories={totalMemories} />
 
         {/* Customer Memory Banks Grid */}
         <div className="space-y-4">
@@ -98,7 +123,7 @@ export default function App() {
             <div className="p-10 text-center text-xs text-slate-400 animate-pulse glass-panel rounded-2xl">
               Querying Hindsight Customer Memory Banks...
             </div>
-          ) : accounts.length === 0 ? (
+          ) : accountList.length === 0 ? (
             <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-dashed border-indigo-500/30 text-center space-y-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl bg-indigo-600/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
                 <UserPlus className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -116,7 +141,7 @@ export default function App() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
-              {accounts.map((acc) => (
+              {accountList.map((acc) => (
                 <AccountCard
                   key={acc.id}
                   account={acc}
