@@ -6,6 +6,7 @@ from app.services.memory_service import memory_service
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
 @router.get("", response_model=List[Customer])
+@router.get("/", response_model=List[Customer])
 def list_customers():
     """List all managed support customers and active Hindsight memory node count."""
     return memory_service.get_all_customers()
@@ -19,6 +20,7 @@ def get_customer(customer_id: str):
     return cust
 
 @router.post("", response_model=Customer)
+@router.post("/", response_model=Customer)
 def create_customer(customer_data: CustomerCreate):
     """Create a new customer profile with dedicated Hindsight memory bank."""
     return memory_service.create_customer(customer_data)

@@ -1,6 +1,12 @@
-import axios from 'axios';
+let rawBaseUrl = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+rawBaseUrl = rawBaseUrl.trim().replace(/\/+$/, '');
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+// Automatically ensure /api/v1 suffix if user entered root domain without /api/v1
+if (rawBaseUrl.startsWith('http') && !rawBaseUrl.endsWith('/api/v1')) {
+  rawBaseUrl = `${rawBaseUrl}/api/v1`;
+}
+
+const API_BASE_URL = rawBaseUrl;
 
 const client = axios.create({
   baseURL: API_BASE_URL,

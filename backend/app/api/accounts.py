@@ -6,6 +6,7 @@ from app.services.memory_service import memory_service
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
 @router.get("", response_model=List[Account])
+@router.get("/", response_model=List[Account])
 def list_accounts():
     """List all managed customer accounts and their active Hindsight memory count."""
     return memory_service.get_all_accounts()
@@ -19,6 +20,7 @@ def get_account(account_id: str):
     return acc
 
 @router.post("", response_model=Account)
+@router.post("/", response_model=Account)
 def create_account(account_data: AccountCreate):
     """Create a new customer account with a dedicated Hindsight memory bank."""
     return memory_service.create_account(account_data)
